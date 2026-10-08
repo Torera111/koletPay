@@ -6,7 +6,18 @@ import type { ReactNode } from 'react';
 import { useKoletPay } from '@/lib/store';
 const nav=[{href:'/',title:'Home',icon:Home},{href:'/customers',title:'Customers',icon:Users},{href:'/invoices',title:'Invoices',icon:ReceiptText},{href:'/products',title:'Products & Services',icon:Package},{href:'/payments',title:'Payments',icon:Wallet},{href:'/installments',title:'Pay in parts',icon:CalendarClock},{href:'/reports',title:'Reports',icon:BarChart3},{href:'/assistant',title:'Kolet AI',icon:Mic},{href:'/settings',title:'Settings',icon:Settings}];
 export function Shell({children}:{children:ReactNode}){
- const path=usePathname(); const {data}=useKoletPay();
+const path = usePathname();
+const { data } = useKoletPay();
+
+if (
+  path === "/login" ||
+  path.startsWith("/login/") ||
+  path === "/register" ||
+  path.startsWith("/register/")
+) {
+  return <>{children}</>;
+}
+
  return <div className="app-shell">
   <aside className="sidebar" aria-label="Main navigation">
    <Link href="/" className="brand"><span className="brand-symbol">K</span> KoletPay</Link>
