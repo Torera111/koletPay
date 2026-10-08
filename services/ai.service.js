@@ -1,7 +1,8 @@
 // src/services/ai.service.js
- import { GoogleGenAI } from '@google/genai'; 
-import dotenv from'dotenv';
- dotenv.config(); 
+import { GoogleGenAI } from '@google/genai';
+import dotenv from 'dotenv';
+dotenv.config();
+dotenv.config({ path: 'src/.env' });
  // Initialize the Google GenAI client with your API key
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
