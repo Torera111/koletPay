@@ -1,12 +1,10 @@
-import express from 'express';
+// src/routes/invoice.routes.js
+import { Router } from 'express';
+import { generateVoiceInvoice } from '../controllers/invoice.controller.js';
 
-const router = express.Router();
+const router = Router();
 
-router.get('/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Invoices route is working',
-  });
-});
+// Endpoint that your frontend UI will call
+router.post('/voice-create', generateVoiceInvoice);
 
 export default router;
