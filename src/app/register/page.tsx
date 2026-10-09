@@ -9,6 +9,7 @@ import { useDemoSession } from "@/lib/demo-session";
 import { useAuth } from "@/lib/auth";
 
 export default function RegisterPage() {
+  const demoMode = process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true";
   const router = useRouter();
   const { data, ready, updateBusiness } = useKoletPay();
   const { enterDemo } = useDemoSession();
@@ -35,7 +36,7 @@ export default function RegisterPage() {
     }
 
     setSubmitting(true);
-    void register({ name: displayName, email, phoneNumber: phone, password })
+    void register({ name: displayName, email, phoneNumber: phone, password, businessName })
       .then(() => {
         updateBusiness({ ...data.business, name: businessName, email, phone });
         router.replace("/dashboard");
@@ -81,13 +82,13 @@ export default function RegisterPage() {
             </Link>
           </div>
           <div className="auth-heading">
-            <span className="eyebrow">Merchant registration</span>
+            <span className="eyebrow">{demoMode ? "Local demo setup" : "Merchant registration"}</span>
             <h2>Create your workspace</h2>
-            <p>Register a secure merchant account for your business.</p>
+            <p>{demoMode ? "Create a browser-only workspace using sample details." : "Register a secure merchant account for your business."}</p>
           </div>
           <div className="note" style={{ marginBottom: 16 }}>
             <ShieldAlert size={17} style={{ verticalAlign: "middle", marginRight: 7 }} />
-            Passwords are hashed on the server and never returned to the browser.
+            {demoMode ? "Demo details stay in localStorage. Do not use real personal or business information." : "Passwords are hashed on the server and never returned to the browser."}
           </div>
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="auth-field-grid">
@@ -138,8 +139,7 @@ export default function RegisterPage() {
             {notice && <p role="alert" className="auth-message">{notice}</p>}
           </form>
           <p className="small" style={{ marginTop: 12 }}>
-            Business details and invoices are saved by the existing browser demo
-            store and may remain after you exit the preview. Avoid real information.
+            {demoMode ? "Business details and invoices are saved by the existing browser demo store. Avoid real information." : "Your account and business data will be handled by the configured backend."}
           </p>
           <p className="auth-footer">
             Already exploring? <Link href="/login">Back to demo access</Link>

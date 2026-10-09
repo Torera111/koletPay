@@ -44,7 +44,7 @@ export function DemoSessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem(KEY);
+      const stored = localStorage.getItem(KEY);
       if (stored) {
         const value: unknown = JSON.parse(stored);
         if (isDemoIdentity(value)) setIdentity(value);
@@ -58,7 +58,7 @@ export function DemoSessionProvider({ children }: { children: ReactNode }) {
   const enterDemo = (nextIdentity: DemoIdentity) => {
     setIdentity(nextIdentity);
     try {
-      sessionStorage.setItem(KEY, JSON.stringify(nextIdentity));
+      localStorage.setItem(KEY, JSON.stringify(nextIdentity));
     } catch {
       // Preview access still works for the current render tree.
     }
@@ -67,7 +67,7 @@ export function DemoSessionProvider({ children }: { children: ReactNode }) {
   const exitDemo = () => {
     setIdentity(null);
     try {
-      sessionStorage.removeItem(KEY);
+      localStorage.removeItem(KEY);
     } catch {
       // No-op if browser storage is disabled.
     }

@@ -18,15 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          <DemoSessionProvider>
+        <DemoSessionProvider>
+          <AuthProvider>
             <StoreProvider>
               <DemoAccessGate>
                 <Shell>{children}</Shell>
               </DemoAccessGate>
             </StoreProvider>
-          </DemoSessionProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </DemoSessionProvider>
       </body>
     </html>
   );

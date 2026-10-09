@@ -9,6 +9,7 @@ import { useDemoSession } from "@/lib/demo-session";
 import { useAuth } from "@/lib/auth";
 
 export default function LoginPage() {
+  const demoMode = process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true";
   const router = useRouter();
   const { data, ready } = useKoletPay();
   const { enterDemo } = useDemoSession();
@@ -81,14 +82,14 @@ export default function LoginPage() {
             </Link>
           </div>
           <div className="auth-heading">
-            <span className="eyebrow">Merchant sign in</span>
+            <span className="eyebrow">{demoMode ? "Local demo mode" : "Merchant sign in"}</span>
             <h2>Welcome back</h2>
-            <p>Sign in to your secure KoletPay business workspace.</p>
+            <p>{demoMode ? "Continue into the browser-only KoletPay demo." : "Sign in to your secure KoletPay business workspace."}</p>
           </div>
 
           <div className="note" style={{ marginBottom: 18 }}>
             <LockKeyhole size={17} style={{ marginRight: 7, verticalAlign: "middle" }} />
-            Sessions expire automatically and are protected by an HttpOnly cookie.
+            {demoMode ? "Demo access is stored locally and is not secure authentication." : "Sessions expire automatically and are protected by an HttpOnly cookie."}
           </div>
 
           <form className="auth-form" onSubmit={handleLogin}>
@@ -101,7 +102,7 @@ export default function LoginPage() {
               <input id="login-password" className="field" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} />
             </div>
             <button type="submit" disabled={submitting} className="btn blue auth-submit">
-              {submitting ? "Signing in..." : "Sign in"} <ArrowRight size={17} />
+              {submitting ? "Opening..." : demoMode ? "Continue locally" : "Sign in"} <ArrowRight size={17} />
             </button>
             {notice && <p role="alert" className="auth-message">{notice}</p>}
           </form>
