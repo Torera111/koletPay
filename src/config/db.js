@@ -1,7 +1,13 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-//Ensure environment variables are loaded before configuring the DB
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load env from the project .env file regardless of where the app is launched from
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
 const connectDB = async () => {
