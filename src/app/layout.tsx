@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { StoreProvider } from "@/lib/store";
 import { Shell } from "@/components/Shell";
+import { DemoSessionProvider } from "@/lib/demo-session";
+import { AuthProvider } from "@/lib/auth";
+import { DemoAccessGate } from "@/components/DemoAccessGate";
 import "./global.css";
 export const metadata: Metadata = {
   title: "KoletPay | Invoice & Customer Ledger",
@@ -15,9 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StoreProvider>
-          <Shell>{children}</Shell>
-        </StoreProvider>
+        <AuthProvider>
+          <DemoSessionProvider>
+            <StoreProvider>
+              <DemoAccessGate>
+                <Shell>{children}</Shell>
+              </DemoAccessGate>
+            </StoreProvider>
+          </DemoSessionProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -29,6 +29,7 @@ export type Payment = {
   amount: number;
   date: string;
   method: string;
+  status?: "SUCCESSFUL" | "PENDING" | "FAILED";
 };
 export type Invoice = {
   id: string;

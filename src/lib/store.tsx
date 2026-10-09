@@ -98,6 +98,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           amount: actual,
           date: new Date().toISOString().slice(0, 10),
           method: "Simulated transfer",
+            status: "SUCCESSFUL",
         };
         return { ...inv, payments: [...inv.payments, payment] };
       }),

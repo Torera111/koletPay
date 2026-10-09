@@ -13,6 +13,31 @@ npm run dev
 
 Then visit [http://localhost:3000](http://localhost:3000). Requires Node.js 20 or newer.
 
+The API is a separate package in `src/`. Run `npm install` at the repository root
+and in `src/`, then start it with `npm --prefix src run dev`. The API will not
+listen until MongoDB connects successfully.
+
+Required API configuration:
+
+- `MONGO_URI` — MongoDB connection string.
+- `CLIENT_URL` — comma-separated allowed frontend origins; required in production.
+- `NODE_ENV=production` — enables secure cookie and production restrictions.
+- `NEXT_PUBLIC_API_URL` — frontend API base URL, defaulting to `http://localhost:5000`.
+- `NEXT_PUBLIC_ENABLE_DEMO_MODE=true` — explicitly enables the local browser demo; do not set this in production.
+- `GEMINI_API_KEY` — required only for the optional voice invoice endpoint.
+- `ENABLE_DEMO_PAYMENTS=true` — development-only payment recording switch; verified provider events are required in production.
+
+The API exposes session-backed authentication under `/api/v1/auth`, merchant-scoped
+customer and product routes, and the existing invoice voice route. Password hashes,
+merchant ownership, invoice totals, and payment success state are server-controlled.
+Payment-provider credentials and signature verification are not implemented in this
+prototype; the payment endpoint accepts a payment only when an upstream integration
+has explicitly marked it verified. Pending and failed events are not revenue.
+
+Existing browser demo data is not automatically migrated into MongoDB. Seed or
+migrate records with an authenticated merchant ownership field before using the API
+with historical data.
+
 ## What's in the frontend
 
 - Home with daily, monthly and yearly revenue views, recent invoices, top customers and popular products
