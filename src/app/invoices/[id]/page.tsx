@@ -1,15 +1,289 @@
-'use client';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useState } from 'react';
-import { ArrowLeft, Printer, CheckCircle2, CreditCard, Clipboard, Mail } from 'lucide-react';
-import { useKoletPay } from '@/lib/store';
-import { amountOf, paidOf, remainingOf, money, shortDate, statusOf } from '@/lib/types';
-import { PageHead, Status } from '@/components/Shell';
-export default function InvoiceDetail(){const {id}=useParams<{id:string}>();const {data,simulatePayment}=useKoletPay();const inv=data.invoices.find(i=>i.id===id);const [partial,setPartial]=useState('');const [message,setMessage]=useState('');if(!inv)return <><PageHead title="Invoice not found"/><Link href="/invoices">Back</Link></>;
-const customer=data.customers.find(c=>c.id===inv.customerId);const total=amountOf(inv),paid=paidOf(inv),remaining=remainingOf(inv),status=statusOf(inv);
-const register=(amount:number)=>{if(!Number.isFinite(amount)||amount<=0||amount>remaining){setMessage(`Enter an amount between ₦1 and ${money(remaining)}.`);return;}simulatePayment(inv.id,amount);setMessage(`Simulated payment of ${money(amount)} recorded.`);setPartial('')};
-const copy=async()=>{try{await navigator.clipboard.writeText(window.location.href);setMessage('Invoice URL copied to clipboard.')}catch{setMessage('Copy the page URL from your browser address bar.')}};
-return <><div className="filter-row"><Link className="btn sm" href="/invoices"><ArrowLeft size={16}/> All invoices</Link><span className="pill">Frontend-only payment demo</span></div><PageHead title={inv.id} sub="View invoice, track progress and simulate payments." action={<button className="btn" onClick={()=>window.print()}><Printer size={15}/> Print / Save PDF</button>}/>
-<div className="grid-main"><div><section className="card"><div className="paper"><div className="invoice-top"><div><h2 style={{fontSize:22}}>{data.business.name}</h2><p className="small">{data.business.email} · {data.business.phone}</p></div><span className="red-serial">No. {inv.id}</span></div><div className="divider"/><div className="grid-half" style={{gap:20}}><div><span className="eyebrow">Billed to</span><p><b>{customer?.name||'Unknown customer'}</b></p><p className="small">{customer?.phone}</p><p className="small">{customer?.email}</p></div><div><span className="eyebrow">Invoice details</span><p>Issued: {shortDate(inv.issuedAt)}</p><p>Due: {shortDate(inv.dueAt)}</p><Status status={status}/></div></div><div className="divider"/><div className="table-scroll"><table className="list-table"><thead><tr><th>Description</th><th>Quantity</th><th>Unit price</th><th>Amount</th></tr></thead><tbody>{inv.items.map((it,i)=><tr key={i}><td>{it.description}</td><td>{it.quantity}</td><td>{money(it.unitPrice)}</td><td>{money(it.unitPrice*it.quantity)}</td></tr>)}</tbody></table></div><div className="divider"/><div className="status-line"><b>Invoice total</b><strong className="money-big">{money(total)}</strong></div><div className="status-line"><span className="muted">Paid so far</span><b className="success">{money(paid)}</b></div><div className="status-line"><b>Balance due</b><b className="danger-text" style={{fontSize:20}}>{money(remaining)}</b></div>{inv.notes&&<div className="note" style={{marginTop:16}}><b>Project / delivery notes:</b> {inv.notes}</div>}</div></section><section className="card"><div className="card-head"><h2>Payment history</h2><span className="pill">{inv.payments.length} payment(s)</span></div>{inv.payments.length?inv.payments.map(p=><div className="row" key={p.id}><span className="avatar"><CheckCircle2 size={19}/></span><span className="content"><b>{p.method}</b><p>{shortDate(p.date)} · {p.id}</p></span><span className="end"><b className="success">+{money(p.amount)}</b></span></div>):<p className="muted">No payments recorded for this invoice.</p>}{remaining===0&&<div className="note" style={{marginTop:20}}><b>Fully paid.</b> This invoice is your complete receipt. Select Print / Save PDF to export it.</div>}</section></div>
-<div><section className="card"><h2 className="title-sm">Payment status</h2><Status status={status}/><div style={{margin:'18px 0 10px',height:8,borderRadius:10,background:'#e7eaff',overflow:'hidden'}}><div style={{background:'var(--blue)',height:'100%',width:`${total?paid/total*100:0}%`}}/></div><p className="small">{money(paid)} of {money(total)} received</p><div className="divider"/>{remaining>0?<><p className="small" style={{marginBottom:12}}>Demo payment actions (no bank account or live transfer involved)</p><button className="btn blue block" onClick={()=>register(remaining)}><CreditCard size={16}/> Simulate full balance payment</button><div className="form-group" style={{marginTop:16}}><label className="label">Or record a partial payment (₦)</label><input className="field" type="number" min="1" max={remaining} value={partial} onChange={e=>setPartial(e.target.value)} placeholder="Enter partial amount"/></div><button className="btn block" onClick={()=>register(Number(partial))} disabled={!partial}>Simulate partial payment</button></>:<div className="note success"><CheckCircle2 size={18}/> Balance cleared. Receipt is ready.</div>}{message&&<p style={{marginTop:12}} className="small" role="status">{message}</p>}</section><section className="card"><h2 className="title-sm">Installments</h2><p className="section-sub">Offer a customer a clear payment schedule for any remaining invoice balance.</p><Link className="btn block" href={`/installments?invoice=${inv.id}`}>Calculate a payment plan</Link></section><section className="card"><h2 className="title-sm">Share / contact</h2><div className="stack"><button className="btn block" onClick={copy}><Clipboard size={15}/> Copy invoice link</button>{customer?.email&&<a className="btn block" href={`mailto:${customer.email}?subject=${encodeURIComponent(`Invoice ${inv.id} from ${data.business.name}`)}&body=${encodeURIComponent(`Hello ${customer.name},\n\nHere is your invoice ${inv.id} for ${money(total)}.\n\nKindly review it.\n\nThank you.`)}`}><Mail size={15}/> Draft email</a>}<Link className="btn block" href={`/customers/${inv.customerId}`}>View customer details</Link></div></section></div></div></>}
+"use client";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import {
+  ArrowLeft,
+  Printer,
+  CheckCircle2,
+  CreditCard,
+  Clipboard,
+  Mail,
+} from "lucide-react";
+import { useKoletPay } from "@/lib/store";
+import {
+  amountOf,
+  paidOf,
+  remainingOf,
+  money,
+  shortDate,
+  statusOf,
+} from "@/lib/types";
+import { PageHead, Status } from "@/components/Shell";
+export default function InvoiceDetail() {
+  const { id } = useParams<{ id: string }>();
+  const { data, simulatePayment } = useKoletPay();
+  const inv = data.invoices.find((i) => i.id === id);
+  const [partial, setPartial] = useState("");
+  const [message, setMessage] = useState("");
+  if (!inv)
+    return (
+      <>
+        <PageHead title="Invoice not found" />
+        <Link href="/invoices">Back</Link>
+      </>
+    );
+  const customer = data.customers.find((c) => c.id === inv.customerId);
+  const total = amountOf(inv),
+    paid = paidOf(inv),
+    remaining = remainingOf(inv),
+    status = statusOf(inv);
+  const register = (amount: number) => {
+    if (!Number.isFinite(amount) || amount <= 0 || amount > remaining) {
+      setMessage(`Enter an amount between ₦1 and ${money(remaining)}.`);
+      return;
+    }
+    simulatePayment(inv.id, amount);
+    setMessage(`Simulated payment of ${money(amount)} recorded.`);
+    setPartial("");
+  };
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setMessage("Invoice URL copied to clipboard.");
+    } catch {
+      setMessage("Copy the page URL from your browser address bar.");
+    }
+  };
+  return (
+    <>
+      <div className="filter-row">
+        <Link className="btn sm" href="/invoices">
+          <ArrowLeft size={16} /> All invoices
+        </Link>
+        <span className="pill">Frontend-only payment demo</span>
+      </div>
+      <PageHead
+        title={inv.id}
+        sub="View invoice, track progress and simulate payments."
+        action={
+          <button className="btn" onClick={() => window.print()}>
+            <Printer size={15} /> Print / Save PDF
+          </button>
+        }
+      />
+      <div className="grid-main">
+        <div>
+          <section className="card">
+            <div className="paper">
+              <div className="invoice-top">
+                <div>
+                  <h2 style={{ fontSize: 22 }}>{data.business.name}</h2>
+                  <p className="small">
+                    {data.business.email} · {data.business.phone}
+                  </p>
+                </div>
+                <span className="red-serial">No. {inv.id}</span>
+              </div>
+              <div className="divider" />
+              <div className="grid-half" style={{ gap: 20 }}>
+                <div>
+                  <span className="eyebrow">Billed to</span>
+                  <p>
+                    <b>{customer?.name || "Unknown customer"}</b>
+                  </p>
+                  <p className="small">{customer?.phone}</p>
+                  <p className="small">{customer?.email}</p>
+                </div>
+                <div>
+                  <span className="eyebrow">Invoice details</span>
+                  <p>Issued: {shortDate(inv.issuedAt)}</p>
+                  <p>Due: {shortDate(inv.dueAt)}</p>
+                  <Status status={status} />
+                </div>
+              </div>
+              <div className="divider" />
+              <div className="table-scroll">
+                <table className="list-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Quantity</th>
+                      <th>Unit price</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inv.items.map((it, i) => (
+                      <tr key={i}>
+                        <td>{it.description}</td>
+                        <td>{it.quantity}</td>
+                        <td>{money(it.unitPrice)}</td>
+                        <td>{money(it.unitPrice * it.quantity)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="divider" />
+              <div className="status-line">
+                <b>Invoice total</b>
+                <strong className="money-big">{money(total)}</strong>
+              </div>
+              <div className="status-line">
+                <span className="muted">Paid so far</span>
+                <b className="success">{money(paid)}</b>
+              </div>
+              <div className="status-line">
+                <b>Balance due</b>
+                <b className="danger-text" style={{ fontSize: 20 }}>
+                  {money(remaining)}
+                </b>
+              </div>
+              {inv.notes && (
+                <div className="note" style={{ marginTop: 16 }}>
+                  <b>Project / delivery notes:</b> {inv.notes}
+                </div>
+              )}
+            </div>
+          </section>
+          <section className="card">
+            <div className="card-head">
+              <h2>Payment history</h2>
+              <span className="pill">{inv.payments.length} payment(s)</span>
+            </div>
+            {inv.payments.length ? (
+              inv.payments.map((p) => (
+                <div className="row" key={p.id}>
+                  <span className="avatar">
+                    <CheckCircle2 size={19} />
+                  </span>
+                  <span className="content">
+                    <b>{p.method}</b>
+                    <p>
+                      {shortDate(p.date)} · {p.id}
+                    </p>
+                  </span>
+                  <span className="end">
+                    <b className="success">+{money(p.amount)}</b>
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="muted">No payments recorded for this invoice.</p>
+            )}
+            {remaining === 0 && (
+              <div className="note" style={{ marginTop: 20 }}>
+                <b>Fully paid.</b> This invoice is your complete receipt. Select
+                Print / Save PDF to export it.
+              </div>
+            )}
+          </section>
+        </div>
+        <div>
+          <section className="card">
+            <h2 className="title-sm">Payment status</h2>
+            <Status status={status} />
+            <div
+              style={{
+                margin: "18px 0 10px",
+                height: 8,
+                borderRadius: 10,
+                background: "#e7eaff",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  background: "var(--blue)",
+                  height: "100%",
+                  width: `${total ? (paid / total) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <p className="small">
+              {money(paid)} of {money(total)} received
+            </p>
+            <div className="divider" />
+            {remaining > 0 ? (
+              <>
+                <p className="small" style={{ marginBottom: 12 }}>
+                  Demo payment actions (no bank account or live transfer
+                  involved)
+                </p>
+                <button
+                  className="btn blue block"
+                  onClick={() => register(remaining)}
+                >
+                  <CreditCard size={16} /> Simulate full balance payment
+                </button>
+                <div className="form-group" style={{ marginTop: 16 }}>
+                  <label className="label">
+                    Or record a partial payment (₦)
+                  </label>
+                  <input
+                    className="field"
+                    type="number"
+                    min="1"
+                    max={remaining}
+                    value={partial}
+                    onChange={(e) => setPartial(e.target.value)}
+                    placeholder="Enter partial amount"
+                  />
+                </div>
+                <button
+                  className="btn block"
+                  onClick={() => register(Number(partial))}
+                  disabled={!partial}
+                >
+                  Simulate partial payment
+                </button>
+              </>
+            ) : (
+              <div className="note success">
+                <CheckCircle2 size={18} /> Balance cleared. Receipt is ready.
+              </div>
+            )}
+            {message && (
+              <p style={{ marginTop: 12 }} className="small" role="status">
+                {message}
+              </p>
+            )}
+          </section>
+          <section className="card">
+            <h2 className="title-sm">Installments</h2>
+            <p className="section-sub">
+              Offer a customer a clear payment schedule for any remaining
+              invoice balance.
+            </p>
+            <Link
+              className="btn block"
+              href={`/installments?invoice=${inv.id}`}
+            >
+              Calculate a payment plan
+            </Link>
+          </section>
+          <section className="card">
+            <h2 className="title-sm">Share / contact</h2>
+            <div className="stack">
+              <button className="btn block" onClick={copy}>
+                <Clipboard size={15} /> Copy invoice link
+              </button>
+              {customer?.email && (
+                <a
+                  className="btn block"
+                  href={`mailto:${customer.email}?subject=${encodeURIComponent(`Invoice ${inv.id} from ${data.business.name}`)}&body=${encodeURIComponent(`Hello ${customer.name},\n\nHere is your invoice ${inv.id} for ${money(total)}.\n\nKindly review it.\n\nThank you.`)}`}
+                >
+                  <Mail size={15} /> Draft email
+                </a>
+              )}
+              <Link className="btn block" href={`/customers/${inv.customerId}`}>
+                View customer details
+              </Link>
+            </div>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}

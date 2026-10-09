@@ -1,20 +1,6 @@
-'use client';
-import Link from 'next/link';
-import { useState } from 'react';
-import { ArrowRight, CircleDollarSign, Users, Wallet, FileText, Plus, Package, BarChart3, ReceiptText, Search, Mic, TrendingUp } from 'lucide-react';
-import { useKoletPay } from '@/lib/store';
-import { forCustomer, topProducts, totals, Period } from '@/lib/metrics';
-import { money, shortDate, statusOf, amountOf } from '@/lib/types';
-import { PageHead, Status, QuickLink } from '@/components/Shell';
-import { RevenueChart } from '@/components/RevenueChart';
-export default function Home(){const {data}=useKoletPay();const [period,setPeriod]=useState<Period>('month');const t=totals(data,period);
-const leaders=data.customers.map(c=>({...c,...forCustomer(data,c.id)})).sort((a,b)=>b.spent-a.spent).slice(0,4);
-const products=topProducts(data).slice(0,4);const invoices=[...data.invoices].sort((a,b)=>b.issuedAt.localeCompare(a.issuedAt)).slice(0,5);
-return <><PageHead title={`Welcome back, ${data.business.name.split(' ')[0]} 👋`} sub="Here's what's happening in your business today." action={<Link className="btn blue" href="/invoices/new"><Plus size={16}/> Create invoice</Link>}/>
-<div className="filter-row"><span className="eyebrow">Business overview</span><div className="seg" role="group" aria-label="Reporting period">{(['day','month','year'] as Period[]).map(p=><button key={p} className={period===p?'selected':''} onClick={()=>setPeriod(p)}>{p==='day'?'Today':p==='month'?'This month':'This year'}</button>)}</div></div>
-<div className="stats"><div className="stat blueish"><span className="stat-head"><CircleDollarSign size={17}/> Revenue received</span><strong>{money(t.revenue)}</strong><small>Payments in selected period</small></div><div className="stat greenish"><span className="stat-head"><TrendingUp size={17}/> Payments collected</span><strong>{t.sales}</strong><small>Recorded successful payments</small></div><div className="stat amberish"><span className="stat-head"><Wallet size={17}/> Outstanding</span><strong>{money(t.outstanding)}</strong><small>Across all unpaid invoices</small></div><div className="stat"><span className="stat-head"><Users size={17}/> Total customers</span><strong>{t.customers}</strong><small>Saved customer profiles</small></div></div>
-<div className="grid-main"><div><section className="card"><div className="card-head"><div><h2>Income overview</h2><p className="small">Money collected in the selected period</p></div><Link href="/reports">Detailed reports →</Link></div><RevenueChart period={period}/></section>
-<section className="card"><div className="card-head"><h2>Recent invoices</h2><Link href="/invoices">View all <ArrowRight size={13} style={{verticalAlign:'middle'}}/></Link></div><div className="table-scroll"><table className="list-table"><thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>{invoices.map(i=><tr key={i.id}><td><Link href={`/invoices/${i.id}`}>{i.id}</Link></td><td>{data.customers.find(c=>c.id===i.customerId)?.name||'Unknown'}</td><td><b>{money(amountOf(i))}</b></td><td><Status status={statusOf(i)}/></td><td>{shortDate(i.issuedAt)}</td></tr>)}</tbody></table></div></section></div>
-<div><section className="card"><div className="card-head"><h2>Quick actions</h2></div><div className="quick-grid"><QuickLink href="/invoices/new" icon={<FileText size={22}/>} title="New invoice"/><QuickLink href="/customers" icon={<Users size={22}/>} title="Customers"/><QuickLink href="/products" icon={<Package size={22}/>} title="Products"/><QuickLink href="/reports" icon={<BarChart3 size={22}/>} title="Reports"/></div></section>
-<section className="card"><div className="card-head"><h2>Top customers</h2><Link href="/customers">See all →</Link></div>{leaders.map(c=><Link key={c.id} href={`/customers/${c.id}`} className="row"><span className="avatar">{c.name.slice(0,2).toUpperCase()}</span><span className="content"><b>{c.name}</b><p>{c.invoices.length} invoice(s)</p></span><span className="end"><b>{money(c.spent)}</b><small className="muted">received</small></span></Link>)}</section>
-<section className="card"><div className="card-head"><h2>Top products & services</h2><Link href="/products">See all →</Link></div>{products.map(p=><div key={p.id} className="row"><span className="avatar"><Package size={18}/></span><span className="content"><b>{p.name}</b><p>{p.kind}</p></span><span className="end"><b>{money(p.revenue)}</b></span></div>)}</section></div></div></>}
+
+import { redirect } from 'next/navigation';
+
+export default function Home() {
+  redirect('/login');
+}
