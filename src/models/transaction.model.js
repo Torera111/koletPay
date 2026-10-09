@@ -3,6 +3,12 @@
 import mongoose from 'mongoose';
 
 const transactionSchema = new mongoose.Schema({
+    merchantId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
+    },
     invoiceId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Invoice',
@@ -16,7 +22,8 @@ const transactionSchema = new mongoose.Schema({
 
     amountPaid:{
         type: Number,
-        required: true
+        required: true,
+        min: 0.01
     },
     paymentReference:{
         type: String, //For mocking Wema/ALAT transfer reference
@@ -29,6 +36,8 @@ const transactionSchema = new mongoose.Schema({
         default: 'SUCCESSFUL'
     }
 }, {timestamps: true});
+
+transactionSchema.index({ merchantId: 1, paymentReference: 1 }, { unique: true });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 export default Transaction;

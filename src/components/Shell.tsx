@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Home,
   ReceiptText,
@@ -15,9 +15,11 @@ import {
   ArrowRight,
   Plus,
   CalendarClock,
+  LogOut,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useKoletPay } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
 
 const nav = [
   { href: '/dashboard', title: 'Home', icon: Home },
@@ -33,7 +35,14 @@ const nav = [
 
 export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
+  const router = useRouter();
   const { data } = useKoletPay();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
+  };
 
   // Login and Register use their own layouts.
   if (
@@ -110,6 +119,16 @@ export function Shell({ children }: { children: ReactNode }) {
             >
               <Plus size={19} />
             </Link>
+
+            <button
+              type="button"
+              className="icon-button"
+              onClick={handleLogout}
+              aria-label="Log out"
+              title="Log out"
+            >
+              <LogOut size={18} />
+            </button>
 
             <span className="avatar mini">IP</span>
           </div>

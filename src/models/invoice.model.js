@@ -16,15 +16,18 @@ const invoiceSchema = new mongoose.Schema({
     },
     amount: {
         type: Number,
-        required: true
+        required: true,
+        min: 0.01
     },
     amountPaid: {
         type: Number,
-        default: 0.0
+        default: 0.0,
+        min: 0
     },
     purpose: {
         type: String, //e.g., "Photography", "Catering"
-        required: true
+        required: true,
+        trim: true
     },
     status:{
         type: String,
@@ -39,8 +42,22 @@ const invoiceSchema = new mongoose.Schema({
     dueDate:{
         type: Date,
         required: true
-    }
+    },
+    items: [{
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+        description: { type: String, required: true, trim: true },
+        quantity: { type: Number, required: true, min: 1 },
+        unitPrice: { type: Number, required: true, min: 0.01 }
+    }]
 }, { timestamps: true});
+
+invoiceSchema.pre('validate', function(next) {
+    if (this.items?.length) {
+        this.amount = this.items.reduce((total, item) => total + item.quantity * item.unitPrice, 0);
+    }
+    if (this.amountPaid > this.amount) return next(new Error('Amount paid cannot exceed invoice amount.'));
+    return next();
+});
 
 //virtual property to calculate outstanding balance
 invoiceSchema.virtual('balanceDue').get(function(){

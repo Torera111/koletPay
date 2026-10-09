@@ -12,6 +12,7 @@ export function inPeriod(date: string, period: Period) {
 export function paymentsFor(data: StoreData, period: Period) {
   return data.invoices.flatMap((inv) =>
     inv.payments
+      .filter((p) => p.status !== "PENDING" && p.status !== "FAILED")
       .filter((p) => inPeriod(p.date, period))
       .map((p) => ({
         ...p,
